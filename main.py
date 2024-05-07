@@ -12,7 +12,7 @@ conn = sqlite3.connect('example.db')
 cursor = conn.cursor()
 # Creating a table
 cursor.execute('''CREATE TABLE IF NOT EXISTS users
-                  (name_user, coin)''')
+                  (name_user, coin, email)''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS coins
                   (coin, price)''')
 

@@ -1,4 +1,5 @@
 import requests
+import connect_with_user
 from PIL import Image
 from io import BytesIO
 from matplotlib import pyplot as plt
@@ -8,7 +9,7 @@ import numpy as np
 
 
 def get_info_about_coin_cycle(coin):
-    url = f"https://api.freecryptoapi.com/v1/getData?symbol=BTC+ETH"
+    url = f"https://api.freecryptoapi.com/v1/getData?symbol=BTC+ETH+XPR+LTC+SOL"
     headers = {'Authorization': 'Bearer h77qb2uqo6a9956l6ssj'}
     response = requests.get(url, headers=headers)
 
@@ -29,16 +30,19 @@ def plot(prices, dates):
     plt.legend()
     plt.show()
 
-def get_info_about_coin_to_user(coin, cursor, conn):
+
+def get_info_about_coin_to_user(coin, cursor, conn): # при нажатии на кнопку коина пользователем выполняется это
+
     cursor.execute(f'SELECT price FROM coins WHERE coin = ?', (coin,))
     rows = cursor.fetchall()
     prices = [float(row[0]) for row in rows]
     dates = [i + 1.0 for i in range(len(rows))]
-    plot(prices, dates)
+    #plot(prices, dates) # вывод картинки графика
+    connect_with_user.send_email("ilamalkov886@gmail.com", "BTC", "buy")
     return rows
 
 
-def insert_info_to_db(data, cursor, conn):
+def insert_info_to_db(data, cursor, conn): #заносим в бд coin-price
     coins = list()
     for coin in data['symbols']:
         coins.append((coin['symbol'], coin['last']))
