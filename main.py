@@ -1,5 +1,9 @@
+import threading
 import time
+import telebot
 
+import connect_with_user
+from handlers import setup_handlers
 import requests
 
 import scalping_infrasct
@@ -10,11 +14,30 @@ import users_actions
 
 conn = sqlite3.connect('example.db')
 cursor = conn.cursor()
+
+
 # Creating a table
 cursor.execute('''CREATE TABLE IF NOT EXISTS users
                   (name_user, coin, email)''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS coins
                   (coin, price)''')
+
+
+
+
+token = "7030395083:AAGrUzogRvgFPhK-udJ3jgRAbtdV067-OEk"
+
+
+
+def run_bot():
+    bot = telebot.TeleBot(token)
+    setup_handlers(bot)
+    bot.polling()
+
+
+t = threading.Thread(target=run_bot)
+t.start()
+
 
 
 
@@ -24,3 +47,7 @@ while True:
     print(data)
 
     time.sleep(10)
+
+
+
+

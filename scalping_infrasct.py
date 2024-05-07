@@ -1,9 +1,6 @@
 import requests
-import connect_with_user
-from PIL import Image
-from io import BytesIO
+
 from matplotlib import pyplot as plt
-import folium as f
 import numpy as np
 
 
@@ -23,17 +20,30 @@ def get_info_about_coin_cycle(coin):
 
 def plot(prices, dates):
     global index_img
+
     a = np.array(prices)
     b = np.array(dates)
-    plt.plot(b, a)
 
-    plt.xlabel("Даты")
-    plt.ylabel("Температура")
-    plt.savefig(f'png_temp/plot{index_img}.png')
+    plt.figure(figsize=(10, 6))  # Увеличиваем размер графика
+
+    plt.plot(b, a, marker='o', linestyle='-', color='blue')  # Изменяем стиль линий и маркеры
+
+    plt.xlabel("Дата")
+    plt.ylabel("Цена")
+    plt.title(f"График цены")  # Добавляем заголовок
+
+    plt.xticks(rotation=45)  # Поворачиваем метки оси X для лучшей читаемости
+
+
+    plt.grid(True)  # Добавляем сетку для лучшей ориентации
+
+    plt.tight_layout()  # Улучшаем расположение элементов графика
+
+    plt.savefig(f"png_temp/plot{index_img}.png")
 
     index_img += 1
 
-    return f'png_temp/plot{index_img-1}.png'
+    return f"png_temp/plot{index_img - 1}.png"
 
 
 
@@ -43,9 +53,8 @@ def get_info_about_coin_to_user(coin, cursor, conn): # при нажатии н�
     rows = cursor.fetchall()
     prices = [float(row[0]) for row in rows]
     dates = [i + 1.0 for i in range(len(rows))]
-    plot(prices, dates) # вывод картинки графика
-    return rows
-
+    str = plot(prices, dates) # вывод картинки графика
+    return str
 
 def insert_info_to_db(data, cursor, conn): #заносим в бд coin-price
     coins = list()
