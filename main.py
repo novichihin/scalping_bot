@@ -17,10 +17,10 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS coins
                   (coin, price)''')
 
 
-print(scalping_infrasct.get_info_about_coin_to_user("BTC", cursor, conn))
 
 while True:
     data = scalping_infrasct.get_info_about_coin_cycle("")
     scalping_infrasct.insert_info_to_db(data, cursor, conn)
     print(data)
-    time.sleep(600)
+
+    time.sleep(10)

@@ -7,6 +7,7 @@ import folium as f
 import numpy as np
 
 
+index_img = 0
 
 def get_info_about_coin_cycle(coin):
     url = f"https://api.freecryptoapi.com/v1/getData?symbol=BTC+ETH+XPR+LTC+SOL"
@@ -21,14 +22,19 @@ def get_info_about_coin_cycle(coin):
 
 
 def plot(prices, dates):
+    global index_img
     a = np.array(prices)
     b = np.array(dates)
     plt.plot(b, a)
 
     plt.xlabel("Даты")
     plt.ylabel("Температура")
-    plt.legend()
-    plt.show()
+    plt.savefig(f'png_temp/plot{index_img}.png')
+
+    index_img += 1
+
+    return f'png_temp/plot{index_img-1}.png'
+
 
 
 def get_info_about_coin_to_user(coin, cursor, conn): # при нажатии на кнопку коина пользователем выполняется это
@@ -37,8 +43,7 @@ def get_info_about_coin_to_user(coin, cursor, conn): # при нажатии н�
     rows = cursor.fetchall()
     prices = [float(row[0]) for row in rows]
     dates = [i + 1.0 for i in range(len(rows))]
-    #plot(prices, dates) # вывод картинки графика
-    connect_with_user.send_email("ilamalkov886@gmail.com", "BTC", "buy")
+    plot(prices, dates) # вывод картинки графика
     return rows
 
 
