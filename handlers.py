@@ -1,11 +1,10 @@
 import sqlite3
-
+from users_actions import add_user_coin, get_all_users_coins
 import telebot
 from telebot import types
 import webbrowser
 
 from scalping_infrasct import get_info_about_coin_to_user
-
 
 
 # Список поддерживаемых криптовалют
@@ -99,25 +98,35 @@ def setup_handlers(bot):
     )
     def handle_crypto_selection(message):
         selected_crypto = message.text
-        if selected_crypto in temp_base_users:
-            bot.send_message(
-                message.chat.id,
-                f"Ты уже добавил {selected_crypto} для скальпинга!/n Выбери что-то еще или переходи к выбору /list",
-            )
-        else:
-            bot.send_message(
-                message.chat.id, f"Ты выбрал {selected_crypto} для скальпинга!"
-            )
-            temp_base_users.append(selected_crypto)
-            main_menu(bot, message.chat.id)
+        conn = sqlite3.connect("example.db")
+        cursor = conn.cursor()
+        # if selected_crypto in temp_base_users:
+        #     bot.send_message(
+        #         message.chat.id,
+        #         f"Ты уже добавил {selected_crypto} для скальпинга!/n Выбери что-то еще или переходи к выбору /list",
+        #     )
+        # else:
+        #     bot.send_message(
+        #         message.chat.id, f"Ты выбрал {selected_crypto} для скальпинга!"
+        #     )
+        #     temp_base_users.append(selected_crypto)
+        #     main_menu(bot, message.chat.id)
+        bot.send_message(
+            message.chat.id, f"Ты выбрал {selected_crypto} для скальпинга!"
+        )
+        add_user_coin(message.from_user.id, selected_crypto, cursor, conn)
+        main_menu(bot, message.chat.id)
 
     # Добавляем новый обработчик команды для выбора из списка криптовалют
     @bot.message_handler(commands=["list"])
     def list(message):
+        conn = sqlite3.connect("example.db")
+        cursor = conn.cursor()
         keyboard = telebot.types.ReplyKeyboardMarkup(
             resize_keyboard=True, one_time_keyboard=True
         )
-        for crypto in temp_base_users:
+        base_users = get_all_users_coins(message.from_user.id, cursor)
+        for crypto in base_users:
             button = telebot.types.KeyboardButton(text=crypto)
             keyboard.add(button)
         bot.send_message(
@@ -129,7 +138,7 @@ def setup_handlers(bot):
     # Обработчик выбора криптовалюты из списка выбранных пользователем
     @bot.message_handler(func=lambda message: message.text in temp_base_users)
     def handle_chosen_crypto(message):
-        conn = sqlite3.connect('example.db')
+        conn = sqlite3.connect("example.db")
         cursor = conn.cursor()
         selected_crypto = message.text
         bot.send_message(
@@ -140,11 +149,12 @@ def setup_handlers(bot):
         # webbrowser.open(
         #     f"https://coinmarketcap.com/ru/currencies/{CRYPTO_DICT[selected_crypto]}/"
         # )
-        with open(f'{get_info_about_coin_to_user(selected_crypto, cursor, conn)}', 'rb') as file:
+        with open(
+            f"{get_info_about_coin_to_user(selected_crypto, cursor, conn)}", "rb"
+        ) as file:
             bot.send_photo(
                 message.chat.id,
                 photo=file,
-
             )
         main_menu(bot, message.chat.id)
 
@@ -157,4 +167,3 @@ def setup_handlers(bot):
         ]
         keyboard.add(*buttons)
         return keyboard
-
