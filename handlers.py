@@ -4,7 +4,8 @@ import telebot
 from telebot import types
 import webbrowser
 
-from scalping_infrasct import get_graph_about_coin_to_user, get_analitics_about_coin_to_user
+from scalping_infrasct import get_graph_about_coin_to_user
+from strategy import start_scalping
 
 # Список поддерживаемых криптовалют
 CRYPTO_LIST = [
@@ -41,8 +42,6 @@ def main_menu(bot, chat_id):
         reply_markup=keyboard,
     )
 
-
-user_curr_crypto = {}
 
 # Функция для подключения обработчиков
 def setup_handlers(bot):
@@ -126,50 +125,25 @@ def setup_handlers(bot):
             reply_markup=keyboard,
         )
 
+    # Обработчик выбора криптовалюты из списка выбранных пользователем
     @bot.message_handler(func=lambda message: message.text in temp_base_users)
     def handle_chosen_crypto(message):
+        conn = sqlite3.connect("example.db")
+        cursor = conn.cursor()
         selected_crypto = message.text
-        user_curr_crypto[message.chat.id] = message.text
         bot.send_message(
             message.chat.id,
             f"Ты выбрал {selected_crypto} для просмотра детальной информации.",
         )
-        keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-        options = ["1min", "5min", "10min", "30min"]
-        for option in options:
-            keyboard.add(option)
-        bot.send_message(
-            message.chat.id,
-            "Выбери период:",
-            reply_markup=keyboard,
-        )
 
-    # Новый обработчик для выбора периода
-    @bot.message_handler(func=lambda message: message.text in ["1min", "5min", "10min", "30min"])
-    def handle_period_selection(message):
-        period = message.text
-        selected_crypto = user_curr_crypto[message.chat.id]
-        conn = sqlite3.connect('example.db')
-        cursor = conn.cursor()
-        with open(f'{get_graph_about_coin_to_user(selected_crypto, cursor, conn, period)}', 'rb') as file:
+        with open(
+            f"{get_graph_about_coin_to_user(selected_crypto, cursor, conn)}", "rb"
+        ) as file:
             bot.send_photo(
                 message.chat.id,
                 photo=file,
             )
-        res = get_analitics_about_coin_to_user(selected_crypto, cursor, conn, period)
-        msg = f"Информация для {selected_crypto} за {period}: "
-        msg_res = f"Среднее значение: {res[0]}\nМаксимальное значение: {res[1]}\nМинимальное значение: {res[2]}"
-        bot.send_message(
-            message.chat.id,
-            msg,
-        )
-        bot.send_message(
-            message.chat.id,
-            msg_res,
-        )
-
         main_menu(bot, message.chat.id)
-
 
     # Функция для создания InlineKeyboardMarkup
     def create_inline_keyboard(options):
@@ -181,3 +155,18 @@ def setup_handlers(bot):
         keyboard.add(*buttons)
         return keyboard
 
+    # Обработчик команды для запуска скальпинга
+    @bot.message_handler(commands=["start_scalping"])
+    def start_scalping_command(message):
+        selected_crypto = "BTC"
+        if selected_crypto in temp_base_users:
+            bot.send_message(
+                message.chat.id,
+                f"Запускаю скальпинг для {selected_crypto}!",
+            )
+            start_scalping(selected_crypto)
+        else:
+            bot.send_message(
+                message.chat.id,
+                f"Ты не выбрал {selected_crypto} для скальпинга. Выбери криптовалюту сначала.",
+            )
