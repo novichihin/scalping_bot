@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-
+import math
 from matplotlib import pyplot as plt
 import numpy as np
 
@@ -47,16 +47,17 @@ def plot(prices, dates):
     return f"png_temp/plot{index_img - 1}.png"
 
 
+
 def get_limit(period):
     limit = 0
+    if period == "1min":
+        limit = 60 / 2
+    if period == "5min":
+        limit = 300 / 2
     if period == "10min":
-        limit = 600 / 10
-    if period == "1h":
-        limit = 3600 / 10
-    if period == "5h":
-        limit = 18000 / 10
-    if period == "12h":
-        limit = 43200 / 10
+        limit = 600 / 2
+    if period == "30min":
+        limit = 1800 / 2
 
     print(limit)
     return limit
@@ -74,14 +75,14 @@ def get_analitics_about_coin_to_user(coin, cursor, conn, period):
     limit = get_limit(period)
     cursor.execute(f'SELECT price FROM coins WHERE coin = ? LIMIT?', (coin,limit))
     rows = cursor.fetchall()
-    df = pd.DataFrame(rows, columns=['price'])
-    avg = df['price'].mean()
-    max = df['price'].max()
-    min = df['price'].min()
+    df = [float(row[0]) for row in rows]
+    avg = sum(df) / len(df)
+    maxx = max(df)
+    minn = min(df)
     res = list()
     res.append(avg)
-    res.append(max)
-    res.append(min)
+    res.append(maxx)
+    res.append(minn)
     return res
 
 

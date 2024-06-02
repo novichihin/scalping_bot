@@ -46,7 +46,7 @@ while True:
     scalping_infrasct.insert_info_to_db(data, cursor, conn)
     print(data)
 
-    time.sleep(10)
+    time.sleep(2)
 
 
 
