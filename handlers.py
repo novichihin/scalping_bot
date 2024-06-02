@@ -135,6 +135,8 @@ def setup_handlers(bot):
             reply_markup=keyboard,
         )
 
+
+
     # Обработчик выбора криптовалюты из списка выбранных пользователем
     @bot.message_handler(func=lambda message: message.text in temp_base_users)
     def handle_chosen_crypto(message):
