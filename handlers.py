@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 import webbrowser
 
-from scalping_infrasct import get_info_about_coin_to_user
+from scalping_infrasct import get_graph_about_coin_to_user
 
 
 
@@ -140,13 +140,14 @@ def setup_handlers(bot):
         # webbrowser.open(
         #     f"https://coinmarketcap.com/ru/currencies/{CRYPTO_DICT[selected_crypto]}/"
         # )
-        with open(f'{get_info_about_coin_to_user(selected_crypto, cursor, conn)}', 'rb') as file:
+        with open(f'{get_graph_about_coin_to_user(selected_crypto, cursor, conn)}', 'rb') as file:
             bot.send_photo(
                 message.chat.id,
                 photo=file,
 
             )
         main_menu(bot, message.chat.id)
+
 
     # Функция для создания InlineKeyboardMarkup
     def create_inline_keyboard(options):
