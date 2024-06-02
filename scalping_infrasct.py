@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 import requests
 import math
@@ -64,8 +66,9 @@ def get_limit(period):
 
 def get_graph_about_coin_to_user(coin, cursor, conn, period): # при нажатии на кнопку коина пользователем выполняется это
     limit = get_limit(period)
-    cursor.execute(f'SELECT price FROM coins WHERE coin = ? LIMIT?', (coin, limit))
+    cursor.execute(f'SELECT price, created_at FROM coins WHERE coin = ? ORDER BY created_at DESC LIMIT?', (coin, limit))
     rows = cursor.fetchall()
+    print(rows)
     prices = [float(row[0]) for row in rows]
     dates = [i + 1.0 for i in range(len(rows))]
     str = plot(prices, dates) # вывод картинки графика
@@ -73,9 +76,10 @@ def get_graph_about_coin_to_user(coin, cursor, conn, period): # при нажа�
 
 def get_analitics_about_coin_to_user(coin, cursor, conn, period):
     limit = get_limit(period)
-    cursor.execute(f'SELECT price FROM coins WHERE coin = ? LIMIT?', (coin,limit))
+    cursor.execute(f'SELECT price, created_at FROM coins WHERE coin = ? ORDER BY created_at DESC LIMIT?', (coin, limit))
     rows = cursor.fetchall()
     df = [float(row[0]) for row in rows]
+    print(df)
     avg = sum(df) / len(df)
     maxx = max(df)
     minn = min(df)
@@ -90,9 +94,13 @@ def get_analitics_about_coin_to_user(coin, cursor, conn, period):
 def insert_info_to_db(data, cursor, conn): #заносим в бд coin-price
     coins = list()
     for coin in data['symbols']:
-        coins.append((coin['symbol'], coin['last']))
+        current_time = datetime.datetime.now()
+        formatted_time = current_time.strftime('%Y-%m-%d %H:%M:%S')
+        coins.append((coin['symbol'], coin['last'], formatted_time))
 
-    
-    cursor.executemany('''INSERT INTO coins VALUES (?, ?)''', coins)
+
+
+    print(coins)
+    cursor.executemany('''INSERT INTO coins VALUES (?, ?, ?)''', coins)
 
     conn.commit()

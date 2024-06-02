@@ -20,7 +20,7 @@ cursor = conn.cursor()
 cursor.execute('''CREATE TABLE IF NOT EXISTS users
                   (name_user, coin, email)''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS coins
-                  (coin, price)''')
+                  (coin, price, created_at)''')
 
 
 

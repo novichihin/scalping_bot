@@ -148,27 +148,33 @@ def setup_handlers(bot):
     @bot.message_handler(func=lambda message: message.text in ["1min", "5min", "10min", "30min"])
     def handle_period_selection(message):
         period = message.text
-        selected_crypto = user_curr_crypto[message.chat.id]
-        conn = sqlite3.connect('example.db')
-        cursor = conn.cursor()
-        with open(f'{get_graph_about_coin_to_user(selected_crypto, cursor, conn, period)}', 'rb') as file:
-            bot.send_photo(
+        try:
+            selected_crypto = user_curr_crypto[message.chat.id]
+            conn = sqlite3.connect('example.db')
+            cursor = conn.cursor()
+            with open(f'{get_graph_about_coin_to_user(selected_crypto, cursor, conn, period)}', 'rb') as file:
+                bot.send_photo(
+                    message.chat.id,
+                    photo=file,
+                )
+            res = get_analitics_about_coin_to_user(selected_crypto, cursor, conn, period)
+            msg = f"Информация для {selected_crypto} за {period}: "
+            msg_res = f"Среднее значение: {res[0]}\nМаксимальное значение: {res[1]}\nМинимальное значение: {res[2]}"
+            bot.send_message(
                 message.chat.id,
-                photo=file,
+                msg,
             )
-        res = get_analitics_about_coin_to_user(selected_crypto, cursor, conn, period)
-        msg = f"Информация для {selected_crypto} за {period}: "
-        msg_res = f"Среднее значение: {res[0]}\nМаксимальное значение: {res[1]}\nМинимальное значение: {res[2]}"
-        bot.send_message(
-            message.chat.id,
-            msg,
-        )
-        bot.send_message(
-            message.chat.id,
-            msg_res,
-        )
+            bot.send_message(
+                message.chat.id,
+                msg_res,
+            )
+            main_menu(bot, message.chat.id)
+        except:
+            main_menu(bot, message.chat.id)
 
-        main_menu(bot, message.chat.id)
+
+
+
 
 
     # Функция для создания InlineKeyboardMarkup
