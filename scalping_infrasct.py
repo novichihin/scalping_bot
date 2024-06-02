@@ -1,3 +1,4 @@
+import pandas as pd
 import requests
 
 from matplotlib import pyplot as plt
@@ -48,16 +49,46 @@ def plot(prices, dates):
     return f"png_temp/plot{index_img - 1}.png"
 
 
-def get_info_about_coin_to_user(
-    coin, cursor, conn
-):  # при нажатии на кнопку коина пользователем выполняется это
+def get_limit(period):
+    limit = 0
+    if period == "10min":
+        limit = 600 / 10
+    if period == "1h":
+        limit = 3600 / 10
+    if period == "5h":
+        limit = 18000 / 10
+    if period == "12h":
+        limit = 43200 / 10
 
-    cursor.execute(f"SELECT price FROM coins WHERE coin = ?", (coin,))
+    print(limit)
+    return limit
+
+
+def get_graph_about_coin_to_user(
+    coin, cursor, conn, period
+):  # при нажатии на кнопку коина пользователем выполняется это
+    limit = get_limit(period)
+    cursor.execute(f"SELECT price FROM coins WHERE coin = ? LIMIT?", (coin, limit))
     rows = cursor.fetchall()
     prices = [float(row[0]) for row in rows]
     dates = [i + 1.0 for i in range(len(rows))]
     str = plot(prices, dates)  # вывод картинки графика
     return str
+
+
+def get_analitics_about_coin_to_user(coin, cursor, conn, period):
+    limit = get_limit(period)
+    cursor.execute(f"SELECT price FROM coins WHERE coin = ? LIMIT?", (coin, limit))
+    rows = cursor.fetchall()
+    df = pd.DataFrame(rows, columns=["price"])
+    avg = df["price"].mean()
+    max = df["price"].max()
+    min = df["price"].min()
+    res = list()
+    res.append(avg)
+    res.append(max)
+    res.append(min)
+    return res
 
 
 def insert_info_to_db(data, cursor, conn):  # заносим в бд coin-price
