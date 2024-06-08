@@ -7,6 +7,7 @@ import webbrowser
 from scalping_infrasct import get_graph_about_coin_to_user, get_analitics_about_coin_to_user
 
 # Список поддерживаемых криптовалют
+
 CRYPTO_LIST = [
     "BTC",
     "ETH",
@@ -173,8 +174,7 @@ def setup_handlers(bot):
             main_menu(bot, message.chat.id)
 
 
-
-
+    
 
 
     # Функция для создания InlineKeyboardMarkup
@@ -186,4 +186,7 @@ def setup_handlers(bot):
         ]
         keyboard.add(*buttons)
         return keyboard
+
+        # Обработчик команды для запуска скальпинга
+
 
